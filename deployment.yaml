@@ -1,0 +1,101 @@
+# ====================================================
+# MICROSERVICES DEPLOYMENT MANIFEST
+# ====================================================
+
+# ----------------------------------------------------
+# 1. Service: Sentin-Alert (Node.js)
+# Role: Receives alerts and stores them.
+# ----------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentin-alert-deployment
+spec:
+  replicas: 2                     # High Availability: Run 2 instances
+  selector:
+    matchLabels:
+      app: sentin-alert
+  template:
+    metadata:
+      labels:
+        app: sentin-alert
+    spec:
+      containers:
+      - name: sentin-alert
+        # Image v1 is sufficient as Node.js logic hasn't changed
+        image: docker.io/YOUR_DOCKERHUB_USER/sentin-alert:v1
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+# ----------------------------------------------------
+# 2. Internal Service Discovery for Sentin-Alert
+# This provides a stable DNS name: "sentin-alert-service"
+# ----------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentin-alert-service      # DNS Name used by Python service
+spec:
+  selector:
+    app: sentin-alert
+  ports:
+    - protocol: TCP
+      port: 80                    # Internal Service Port
+      targetPort: 3000            # Target Container Port
+  type: ClusterIP                 # Internal access only
+
+---
+# ----------------------------------------------------
+# 3. Service: Sentin-Eye (Python/Flask)
+# Role: Analyzes images and triggers alerts.
+# ----------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentin-eye-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sentin-eye
+  template:
+    metadata:
+      labels:
+        app: sentin-eye
+    spec:
+      containers:
+      - name: sentin-eye
+        # Using v2 because we updated the code to use Env Vars
+        image: docker.io/YOUR_DOCKERHUB_USER/sentin-eye:v2
+        ports:
+        - containerPort: 5000
+        env:
+        # CONFIGURATION:
+        # Connects Python to the Node.js service via DNS name
+        - name: ALERT_SERVICE_URL
+          value: "http://sentin-alert-service/trigger"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+# ----------------------------------------------------
+# 4. External Access for Sentin-Eye
+# Exposes the Python API to the outside world.
+# ----------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentin-eye-service
+spec:
+  selector:
+    app: sentin-eye
+  ports:
+    - protocol: TCP
+      port: 80                    # External Port (HTTP)
+      targetPort: 5000            # Target Container Port
+  type: LoadBalancer              # Requests a Public IP from Cloud Provider
