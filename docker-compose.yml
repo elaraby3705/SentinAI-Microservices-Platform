@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  # Service 1: The Brain (Python)
+  sentin-eye:
+    build: ./sentin-eye
+    ports:
+      - "5000:5000"
+    container_name: sentin-eye-container
+    restart: always
+
+  # Service 2: The Messenger (Node.js)
+  sentin-alert:
+    build: ./sentin-alert
+    ports:
+      - "3000:3000"
+    container_name: sentin-alert-container
+    restart: always
