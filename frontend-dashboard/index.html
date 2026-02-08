@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentin-AI Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #333; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        pre { background: #eee; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .status { font-weight: bold; }
+        .online { color: green; }
+        .offline { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🛡️ Sentin-AI Control Center</h1>
+
+    <div class="card">
+        <h2>System Status</h2>
+        <p>Brain (Python): <span id="eye-status" class="status">Checking...</span></p>
+        <p>Alert (Node.js): <span id="alert-status" class="status">Checking...</span></p>
+        <button onclick="checkHealth()">Refresh Status</button>
+    </div>
+
+    <div class="card">
+        <h2>Simulate Security Scan</h2>
+        <p>Click to simulate a camera capturing a suspicious image.</p>
+        <button onclick="analyzeImage()">📸 Scan Camera Feed</button>
+        <div id="scan-result" style="margin-top: 15px; display: none;">
+            <h4>Scan Result:</h4>
+            <pre id="json-result"></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Live Security Alerts</h2>
+        <button onclick="fetchAlerts()">🔄 Refresh Alerts Log</button>
+        <ul id="alerts-list" style="margin-top: 15px;"></ul>
+    </div>
+</div>
+
+<script>
+    // ⚙️ Configuration: Pointing to Localhost (VM Port Forwarding)
+    const EYE_API = "http://localhost:5000";
+    const ALERT_API = "http://localhost:3000";
+
+    // 1. Check Health
+    async function checkHealth() {
+        try {
+            let res = await fetch(`${EYE_API}/`);
+            document.getElementById('eye-status').innerHTML = res.ok ? "<span class='online'>ONLINE</span>" : "<span class='offline'>OFFLINE</span>";
+        } catch (e) { document.getElementById('eye-status').innerHTML = "<span class='offline'>OFFLINE</span>"; }
+
+        try {
+            let res = await fetch(`${ALERT_API}/status`);
+            document.getElementById('alert-status').innerHTML = res.ok ? "<span class='online'>ONLINE</span>" : "<span class='offline'>OFFLINE</span>";
+        } catch (e) { document.getElementById('alert-status').innerHTML = "<span class='offline'>OFFLINE</span>"; }
+    }
+
+    // 2. Simulate Analysis
+    async function analyzeImage() {
+        const payload = { "image_url": "http://camera-04.local/snapshot.jpg" };
+        try {
+            let res = await fetch(`${EYE_API}/analyze`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            let data = await res.json();
+
+            document.getElementById('scan-result').style.display = 'block';
+            document.getElementById('json-result').innerText = JSON.stringify(data, null, 2);
+
+            // Auto refresh alerts after scan
+            setTimeout(fetchAlerts, 1000);
+        } catch (e) {
+            alert("Error connecting to Python Brain!");
+        }
+    }
+
+    // 3. Fetch Alerts
+    async function fetchAlerts() {
+        try {
+            let res = await fetch(`${ALERT_API}/alerts`);
+            let alerts = await res.json();
+            const list = document.getElementById('alerts-list');
+            list.innerHTML = "";
+            alerts.forEach(alert => {
+                let li = document.createElement("li");
+                li.innerText = `[${alert.level.toUpperCase()}] ${alert.message} (${alert.timestamp})`;
+                li.style.color = alert.level === 'critical' ? 'red' : 'black';
+                list.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Failed to fetch alerts");
+        }
+    }
+
+    // Initial Check
+    checkHealth();
+</script>
+
+</body>
+</html>
