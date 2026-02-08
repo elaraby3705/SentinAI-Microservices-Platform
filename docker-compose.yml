@@ -1,18 +1,25 @@
 version: '3.8'
 
 services:
-  # Service 1: The Brain (Python)
   sentin-eye:
     build: ./sentin-eye
-    ports:
-      - "5000:5000"
     container_name: sentin-eye-container
+    # ports:        <-- REMOVE THIS! No external access allowed.
+    #   - "5000:5000"
     restart: always
+    environment:
+      - ALERT_SERVICE_URL=http://sentin-alert:3000/trigger
 
-  # Service 2: The Messenger (Node.js)
   sentin-alert:
     build: ./sentin-alert
-    ports:
-      - "3000:3000"
     container_name: sentin-alert-container
+    # ports:        <-- REMOVE THIS! No external access allowed.
+    #   - "3000:3000"
+    restart: always
+
+  sentin-dashboard:
+    build: ./frontend-dashboard
+    container_name: sentin-dashboard-container
+    ports:
+      - "8080:80"   # The ONLY public port
     restart: always

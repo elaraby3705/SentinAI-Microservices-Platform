@@ -47,9 +47,10 @@
 </div>
 
 <script>
-    // ⚙️ Configuration: Pointing to Localhost (VM Port Forwarding)
-    const EYE_API = "http://localhost:5000";
-    const ALERT_API = "http://localhost:3000";
+   // ⚙️ Configuration: Routing via Nginx Reverse Proxy
+    // No more ports! Nginx handles the routing internally.
+    const EYE_API = "/api/eye";
+    const ALERT_API = "/api/alert";
 
     // 1. Check Health
     async function checkHealth() {
