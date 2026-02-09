@@ -3,49 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentin-AI | Security Command Center</title>
+    <title>Sentin-AI | Supply Chain Command</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        body { background-color: #0f172a; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .card { border: 1px solid #1e293b; background-color: #1e293b; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .card-header { background-color: #334155; border-bottom: 1px solid #475569; font-weight: 600; }
+        body { background-color: #0f172a; font-family: 'Segoe UI', system-ui, sans-serif; color: #e2e8f0; }
+        .card { border: 1px solid #1e293b; background-color: #1e293b; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card-header { background-color: #334155; border-bottom: 1px solid #475569; font-weight: 600; letter-spacing: 0.5px; }
+        .btn-primary { background-color: #3b82f6; border: none; }
+        .btn-primary:hover { background-color: #2563eb; }
 
-        /* Terminal Style Logs */
-        .terminal-window {
-            background-color: #0d1117;
-            border-radius: 6px;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #30363d;
-            color: #58a6ff;
-        }
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #21262d; padding-bottom: 2px; }
-        .log-time { color: #8b949e; font-size: 0.85em; margin-right: 10px; }
-        .log-level-critical { color: #ff7b72; font-weight: bold; }
-        .log-level-info { color: #79c0ff; }
-
-        /* Status Indicators */
-        .status-dot {
-            height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 5px;
-        }
-        .status-online { background-color: #2ea043; box-shadow: 0 0 8px #2ea043; }
-        .status-offline { background-color: #da3633; box-shadow: 0 0 8px #da3633; }
-
-        /* Camera Placeholder */
-        .camera-feed {
-            background: #000;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #444;
-            border: 2px dashed #333;
-            border-radius: 4px;
-        }
+        /* Table Styling for "Dealer List" Task */
+        .table-custom { color: #cbd5e1; }
+        .table-custom thead { background-color: #0f172a; color: #94a3b8; text-transform: uppercase; font-size: 0.85rem; }
+        .table-custom tbody tr:hover { background-color: #334155; }
+        .price-tag { color: #34d399; font-weight: bold; font-family: 'Courier New', monospace; }
+        .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -53,52 +27,42 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
-            <i class="fas fa-shield-alt text-primary me-2"></i>Sentin-AI <span class="badge bg-danger ms-2" style="font-size: 0.6em;">BETA</span>
+            <i class="fas fa-shield-alt text-primary me-2"></i>Sentin-AI <span class="badge bg-primary ms-2" style="font-size: 0.6em;">PRO</span>
         </a>
-        <div class="d-flex align-items-center">
-            <span class="text-muted small me-3"><i class="fas fa-server me-1"></i> Cluster: Local-VM</span>
-            <div id="connection-status" class="badge bg-success">Connected</div>
-        </div>
+        <span class="text-muted small">Module: Procurement & Logistics</span>
     </div>
 </nav>
 
-<div class="container-fluid px-4">
+<div class="container px-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="border-bottom border-secondary pb-2"><i class="fas fa-satellite-dish me-2"></i>Security Equipment Procurement</h4>
+            <p class="text-muted small">Manage authorized dealers and hardware pricing for the security grid.</p>
+        </div>
+    </div>
+
     <div class="row g-4">
 
         <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header"><i class="fas fa-heartbeat me-2"></i>System Health</div>
+            <div class="card h-100">
+                <div class="card-header text-uppercase text-xs"><i class="fas fa-filter me-2"></i>Hardware Selection</div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span><i class="fab fa-python me-2"></i>Brain Service (Eye)</span>
-                        <span id="eye-badge" class="badge bg-secondary">Checking...</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span><i class="fab fa-node-js me-2"></i>Alert Service (Node)</span>
-                        <span id="alert-badge" class="badge bg-secondary">Checking...</span>
-                    </div>
-                    <hr>
-                    <button class="btn btn-outline-light w-100 btn-sm" onclick="checkHealth()">
-                        <i class="fas fa-sync-alt me-2"></i>Refresh Status
-                    </button>
-                </div>
-            </div>
+                    <label class="form-label text-info small mb-1">SELECT SECURITY PRODUCT</label>
 
-            <div class="card">
-                <div class="card-header"><i class="fas fa-gamepad me-2"></i>Simulation Controls</div>
-                <div class="card-body text-center">
-                    <div class="camera-feed mb-3" id="camera-placeholder">
-                        <div class="text-center">
-                            <i class="fas fa-video-slash fa-3x mb-2"></i>
-                            <p>Camera Feed Offline</p>
-                        </div>
+                    <select class="form-select bg-dark text-light border-secondary mb-3 p-2" id="product-dropdown" onchange="fetchDealers()">
+                        <option value="all" selected>-- Select Equipment --</option>
+                        <option value="cam-night">🔭 Night Vision Camera X1</option>
+                        <option value="drone-patrol">🚁 Autonomous Drone Scout</option>
+                        <option value="sensor-bio">🧬 Biometric Access Pad</option>
+                    </select>
+
+                    <div class="alert alert-dark border-secondary mt-3">
+                        <small><i class="fas fa-info-circle text-primary me-1"></i> System linked to global vendor database.</small>
                     </div>
-                    <button id="scan-btn" class="btn btn-primary w-100" onclick="analyzeImage()">
-                        <i class="fas fa-camera me-2"></i>Trigger Security Scan
+
+                    <button class="btn btn-outline-light w-100 mt-2" onclick="fetchDealers()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Suppliers
                     </button>
-                    <div id="scan-spinner" class="spinner-border text-primary mt-3 d-none" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -106,143 +70,88 @@
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-terminal me-2"></i>Live Security Logs</span>
-                    <button class="btn btn-xs btn-outline-secondary" onclick="fetchAlerts()"><i class="fas fa-redo"></i></button>
+                    <span><i class="fas fa-truck-loading me-2"></i>AUTHORIZED SUPPLIERS</span>
+                    <span class="badge bg-secondary" id="dealer-count">0 Vendors Found</span>
                 </div>
                 <div class="card-body p-0">
-                    <div class="terminal-window" id="alerts-list">
-                        <div class="log-entry">
-                            <span class="log-time">[SYSTEM]</span> Ready to receive alerts...
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer text-muted small">
-                    Last updated: <span id="last-update">Never</span>
+                    <table class="table table-custom table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Supplier (Dealer)</th>
+                                <th>Location</th>
+                                <th>Rating</th>
+                                <th class="text-end">Unit Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dealer-list">
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Select a product to view suppliers...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-  <div id="liveToast" class="toast text-bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header">
-      <strong class="me-auto">Notification</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body" id="toast-msg">
-      Action completed.
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ⚙️ Configuration (Via Nginx Proxy)
-    const EYE_API = "/api/eye";
-    const ALERT_API = "/api/alert";
+    // 🧠 MOCK DATABASE (Matches "Dealer Pricing" Microservice logic)
+    const database = [
+        { id: 1, dealer: "CyberDyne Systems", location: "California, USA", product: "Night Vision Camera X1", price: 1250, rating: "A+" },
+        { id: 2, dealer: "Stark Industries", location: "New York, USA", product: "Autonomous Drone Scout", price: 45000, rating: "AAA" },
+        { id: 3, dealer: "Wayne Ent.", location: "Gotham, NJ", product: "Night Vision Camera X1", price: 1300, rating: "A" },
+        { id: 4, dealer: "Black Mesa", location: "New Mexico", product: "Biometric Access Pad", price: 850, rating: "B+" },
+        { id: 5, dealer: "Aperture Science", location: "Michigan, USA", product: "Autonomous Drone Scout", price: 44500, rating: "A-" },
+        { id: 6, dealer: "Umbrella Corp", location: "Raccoon City", product: "Biometric Access Pad", price: 800, rating: "B" },
+        { id: 7, dealer: "Massive Dynamic", location: "Boston, MA", product: "Night Vision Camera X1", price: 1200, rating: "A+" }
+    ];
 
-    // Toast Utility
-    const showToast = (msg, type='primary') => {
-        const toastEl = document.getElementById('liveToast');
-        document.getElementById('toast-msg').innerText = msg;
-        toastEl.className = `toast text-bg-${type}`;
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-    };
+    function fetchDealers() {
+        const selected = document.getElementById('product-dropdown').value;
+        const tbody = document.getElementById('dealer-list');
+        const countBadge = document.getElementById('dealer-count');
 
-    // 1. Health Check
-    async function checkHealth() {
-        updateBadge('eye-badge', 'secondary', 'Connecting...');
-        updateBadge('alert-badge', 'secondary', 'Connecting...');
+        tbody.innerHTML = ''; // Clear table
 
-        try {
-            let res = await fetch(`${EYE_API}/`);
-            updateBadge('eye-badge', res.ok ? 'success' : 'danger', res.ok ? 'ONLINE' : 'ERROR');
-        } catch (e) { updateBadge('eye-badge', 'danger', 'OFFLINE'); }
+        // Map selection to Product Name
+        const productMap = {
+            'cam-night': 'Night Vision Camera X1',
+            'drone-patrol': 'Autonomous Drone Scout',
+            'sensor-bio': 'Biometric Access Pad'
+        };
 
-        try {
-            let res = await fetch(`${ALERT_API}/status`);
-            updateBadge('alert-badge', res.ok ? 'success' : 'danger', res.ok ? 'ONLINE' : 'ERROR');
-        } catch (e) { updateBadge('alert-badge', 'danger', 'OFFLINE'); }
-    }
+        let results = [];
 
-    function updateBadge(id, color, text) {
-        const el = document.getElementById(id);
-        el.className = `badge bg-${color}`;
-        el.innerText = text;
-        if(color === 'success') {
-            el.innerHTML = `<span class="status-dot status-online"></span>${text}`;
+        // Logic for "Select All" vs "Select Specific"
+        if (selected === 'all') {
+            results = database; // Show everything
+        } else {
+            results = database.filter(item => item.product === productMap[selected]);
         }
-    }
 
-    // 2. Simulate Analysis
-    async function analyzeImage() {
-        const btn = document.getElementById('scan-btn');
-        const spinner = document.getElementById('scan-spinner');
-        const placeholder = document.getElementById('camera-placeholder');
-
-        // Visual Feedback
-        btn.disabled = true;
-        spinner.classList.remove('d-none');
-        placeholder.innerHTML = '<img src="https://picsum.photos/400/250?grayscale" class="img-fluid rounded" alt="Scanned">';
-
-        try {
-            let res = await fetch(`${EYE_API}/analyze`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "image_url": "http://cam-01.local/rec.jpg" })
-            });
-            let data = await res.json();
-
-            showToast(`Scan Complete: ${data.threat_level.toUpperCase()}`, 'danger');
-            setTimeout(fetchAlerts, 1000); // Auto refresh logs
-        } catch (e) {
-            showToast("Connection Failed!", "danger");
-        } finally {
-            btn.disabled = false;
-            spinner.classList.add('d-none');
+        // Render Rows
+        if(results.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No suppliers found for this item.</td></tr>';
+            countBadge.innerText = '0 Vendors';
+            return;
         }
+
+        results.forEach(item => {
+            const row = `
+            <tr>
+                <td class="fw-bold"><i class="fas fa-building text-secondary me-2"></i>${item.dealer}</td>
+                <td class="small text-muted">${item.location}</td>
+                <td><span class="badge bg-dark border border-secondary">${item.rating}</span></td>
+                <td class="text-end price-tag">$${item.price.toLocaleString()}</td>
+            </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+
+        countBadge.innerText = `${results.length} Vendors Active`;
+        countBadge.className = 'badge bg-success';
     }
-
-    // 3. Fetch Alerts
-    async function fetchAlerts() {
-        try {
-            let res = await fetch(`${ALERT_API}/alerts`);
-            let alerts = await res.json();
-            const list = document.getElementById('alerts-list');
-
-            if(alerts.length === 0) {
-                 list.innerHTML = '<div class="log-entry">No alerts found in system.</div>';
-                 return;
-            }
-
-            list.innerHTML = ""; // Clear
-            // Reverse to show newest first
-            [...alerts].reverse().forEach(alert => {
-                const isCrit = alert.level === 'critical';
-                const colorClass = isCrit ? 'log-level-critical' : 'log-level-info';
-                const icon = isCrit ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-info-circle"></i>';
-
-                const html = `
-                <div class="log-entry">
-                    <span class="log-time">[${new Date(alert.timestamp).toLocaleTimeString()}]</span>
-                    <span class="${colorClass}">${icon} ${alert.level.toUpperCase()}:</span>
-                    ${alert.message}
-                </div>`;
-                list.innerHTML += html;
-            });
-
-            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
-        } catch (e) {
-            console.error("Failed to fetch alerts");
-        }
-    }
-
-    // Initial Load
-    checkHealth();
-    fetchAlerts();
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
